@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+
+require "thor"
+require "highline/import"
+
+require_relative "../lib/cheetahmail"
+
+class CheetahMailApp < Thor
+  class_option :username, required: true, aliases: "u"
+  class_option :password, required: true, aliases: "p"
+
+  desc "segment", "Download a segment"
+  def segment
+    login
+
+    segmentation = CheetahMail::Segmentation.new
+
+    to_download = nil
+    choose do |menu|
+      menu.prompt = "Choose a segment to download: "
+
+      segmentation.segments.each do |segment|
+        menu.choice "#{segment.name} (ID: #{segment.id})" do
+          to_download = segment
+        end
+      end
+    end
+
+    to_download.download
+  end
+
+  no_commands do
+    def login
+      login = CheetahMail::Login.new
+      login.call(username: options[:username], password: options[:password])
+    end
+  end
+end
+
+CheetahMailApp.start
+
