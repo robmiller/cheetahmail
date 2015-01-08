@@ -7,3 +7,5 @@ gem "thor"
 gem "highline"
 
 gem "retries"
+
+gem "chronic"

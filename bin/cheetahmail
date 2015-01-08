@@ -39,6 +39,35 @@ class CheetahMailApp < Thor
     end
   end
 
+  desc "mailings", "List recent mailings"
+  method_option :segment
+  def mailings
+    login
+
+    mailings = CheetahMail::Mailings.new.mailings
+
+    if options[:segment]
+      mailings = mailings.select { |m| m.segment == options[:segment] }
+    end
+
+    mailings = mailings.take(50)
+
+    table_row = "| %-15.15s | %-40.40s | %-15.15s | %9s |\n"
+
+    header = sprintf table_row, "Name", "Subject", "Segment", "Sent to"
+    divider = "+" + ("-" * (header.chomp.length - 2)) + "+"
+
+    puts divider
+    puts header
+    puts divider
+
+    mailings.each do |mailing|
+      printf table_row, mailing.name, mailing.subject, mailing.segment, CheetahMail.commaize(mailing.sent_to)
+    end
+
+    puts divider
+  end
+
   no_commands do
     def login
       login = CheetahMail::Login.new
