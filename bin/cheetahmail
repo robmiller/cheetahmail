@@ -10,23 +10,33 @@ class CheetahMailApp < Thor
   class_option :password, required: true, aliases: "p"
 
   desc "segment", "Download a segment"
+  method_option :segment
   def segment
     login
 
     segmentation = CheetahMail::Segmentation.new
 
     to_download = nil
-    choose do |menu|
-      menu.prompt = "Choose a segment to download: "
 
-      segmentation.segments.each do |segment|
-        menu.choice "#{segment.name} (ID: #{segment.id})" do
-          to_download = segment
+    if options[:segment]
+      to_download = segmentation.segments.find { |s| s.name == options[:segment] }
+    else
+      choose do |menu|
+        menu.prompt = "Choose a segment to download: "
+
+        segmentation.segments.each do |segment|
+          menu.choice("#{segment.name} (ID: #{segment.id})") { to_download = segment }
         end
       end
     end
 
-    to_download.download
+    if to_download
+      to_download.download
+      puts to_download.filename
+    else
+      $stderr.puts "That segment doesn't seem to exist."
+      exit 1
+    end
   end
 
   no_commands do
