@@ -9,3 +9,5 @@ gem "highline"
 gem "retries"
 
 gem "chronic"
+
+gem "pry"

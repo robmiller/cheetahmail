@@ -68,6 +68,36 @@ class CheetahMailApp < Thor
     puts divider
   end
 
+  desc "report", "Get a report for a given mailing"
+  method_option :mailing
+  method_option :json, type: :boolean
+  def report
+    login
+
+    mailings = CheetahMail::Mailings.new.mailings
+
+    mailing = mailings.find { |m| m.subject == options[:mailing] }
+
+    report = mailing.report
+
+    if options[:json]
+      puts JSON.generate(report)
+    else
+      puts "Mailing report for #{mailing.subject}"
+      table = "%9s: %-9s\n"
+
+      printf table, "Received", CheetahMail.commaize(report[:received])
+
+      puts "\nOpens"
+      printf table, "All",      CheetahMail.commaize(report[:opens][:all])
+      printf table, "Unique",   CheetahMail.commaize(report[:opens][:unique])
+
+      puts "\nClicks"
+      printf table, "All",      CheetahMail.commaize(report[:clicks][:all])
+      printf table, "Unique",   CheetahMail.commaize(report[:clicks][:unique])
+    end
+  end
+
   no_commands do
     def login
       login = CheetahMail::Login.new

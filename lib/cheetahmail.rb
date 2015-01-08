@@ -3,6 +3,8 @@ require "bundler/setup"
 require "nokogiri"
 require "mechanize"
 
+require "pry"
+
 module CheetahMail
   AGENT = Mechanize.new
   AGENT.user_agent_alias = "Mac Safari"
