@@ -21,8 +21,6 @@ module CheetahMail
     end
   end
 
-  class NotGeneratedError < StandardError; end
-
   Segment = Struct.new(:id, :name) do
     def filename
       CheetahMail.output_dir + "segment_#{id}_#{safe_name}.csv"

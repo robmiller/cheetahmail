@@ -11,3 +11,5 @@ gem "retries"
 gem "chronic"
 
 gem "pry"
+gem "pry-rescue"
+gem "pry-stack_explorer"

@@ -10,6 +10,7 @@ module CheetahMail
   AGENT.user_agent_alias = "Mac Safari"
 
   class NotAuthorised < StandardError; end
+  class NotGeneratedError < StandardError; end
 
   class << self
     def logged_in?

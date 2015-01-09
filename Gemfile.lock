@@ -1,13 +1,17 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    binding_of_caller (0.7.2)
+      debug_inspector (>= 0.0.1)
     chronic (0.10.2)
     coderay (1.1.0)
+    debug_inspector (0.0.2)
     domain_name (0.5.23)
       unf (>= 0.0.5, < 1.0.0)
     highline (1.6.21)
     http-cookie (1.0.2)
       domain_name (~> 0.5)
+    interception (0.5)
     mechanize (2.7.3)
       domain_name (~> 0.5, >= 0.5.1)
       http-cookie (~> 1.0)
@@ -29,6 +33,12 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    pry-rescue (1.4.1)
+      interception (>= 0.5)
+      pry
+    pry-stack_explorer (0.4.9.1)
+      binding_of_caller (>= 0.7)
+      pry (>= 0.9.11)
     retries (0.0.5)
     slop (3.6.0)
     thor (0.19.1)
@@ -46,5 +56,7 @@ DEPENDENCIES
   mechanize
   nokogiri
   pry
+  pry-rescue
+  pry-stack_explorer
   retries
   thor

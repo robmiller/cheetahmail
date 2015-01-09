@@ -33,6 +33,8 @@ module CheetahMail
   end
 
   Mailing = Struct.new(:id, :name, :subject, :segment, :sent_to, :sent_at, :wostart, :aid) do
+    class NotSentError < StandardError; end
+
     def reporting_url
       "https://app.cheetahmail.com/cgi-bin/mailers/rep/mailsum.cgi?desired_aid=#{aid}&pid=#{id}&wostart=#{wostart}"
     end
@@ -40,13 +42,28 @@ module CheetahMail
     def report
       @report ||=
         begin
-          page = AGENT.get(reporting_url)
+          page = nil
 
-          received = received(page)
-          opens    = opens(page)
-          clicks   = clicks(page)
+          with_retries(max_tries: 20, base_sleep_seconds: 1, max_sleep_seconds: 30, rescue: NotGeneratedError) do
+            page = AGENT.get(reporting_url)
 
-          { received: received, opens: opens, clicks: clicks }
+            if page.search("body").text =~ /report is not available/
+              fail NotSentError
+            end
+
+            if page.search("body").text =~ /currently being generated/
+              $stderr.puts "The mailing report hasn't been generated yet. Waiting"
+              fail NotGeneratedError
+            end
+
+            received = received(page)
+            opens    = opens(page)
+            clicks   = clicks(page)
+
+            { received: received, opens: opens, clicks: clicks }
+            end
+        rescue NotSentError
+          { received: 0, opens: { all: 0, unique: 0 }, clicks: { all: 0, unique: 0 } }
         end
     end
 
