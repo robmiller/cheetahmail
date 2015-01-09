@@ -69,32 +69,45 @@ class CheetahMailApp < Thor
   end
 
   desc "report", "Get a report for a given mailing"
-  method_option :mailing
+  method_option :mailing, required: true
   method_option :json, type: :boolean
   def report
     login
 
     mailings = CheetahMail::Mailings.new.mailings
 
-    mailing = mailings.find { |m| m.subject == options[:mailing] }
+    unless options[:mailing].downcase == 'all'
+      mailings = mailings.find_all { |m| m.subject == options[:mailing] }
+    end
 
-    report = mailing.report
+    if mailings.length < 1
+      $stderr.puts "No matching mailings found"
+      exit 1
+    end
+
 
     if options[:json]
-      puts JSON.generate(report)
+      report = mailings.map { |m| m.report }
+      puts JSON.generate({ report: report })
     else
-      puts "Mailing report for #{mailing.subject}"
-      table = "%9s: %-9s\n"
+      mailings.each do |mailing|
+        report = mailing.report
 
-      printf table, "Received", CheetahMail.commaize(report[:received])
+        puts "Mailing report for #{mailing.subject}"
+        table = "%9s: %-9s\n"
 
-      puts "\nOpens"
-      printf table, "All",      CheetahMail.commaize(report[:opens][:all])
-      printf table, "Unique",   CheetahMail.commaize(report[:opens][:unique])
+        printf table, "Received", CheetahMail.commaize(report[:received])
 
-      puts "\nClicks"
-      printf table, "All",      CheetahMail.commaize(report[:clicks][:all])
-      printf table, "Unique",   CheetahMail.commaize(report[:clicks][:unique])
+        puts "\nOpens"
+        printf table, "All",      CheetahMail.commaize(report[:opens][:all])
+        printf table, "Unique",   CheetahMail.commaize(report[:opens][:unique])
+
+        puts "\nClicks"
+        printf table, "All",      CheetahMail.commaize(report[:clicks][:all])
+        printf table, "Unique",   CheetahMail.commaize(report[:clicks][:unique])
+
+        puts "\n\n"
+      end
     end
   end
 
